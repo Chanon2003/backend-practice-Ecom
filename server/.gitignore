@@ -1,0 +1,40 @@
+# Node modules
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime files
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# dotenv file (for secrets, API keys, etc.)
+.env
+.env.*
+
+# Build files (ถ้าใช้ TypeScript หรือมีการ compile)
+dist/
+build/
+
+# VSCode settings
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Coverage (ถ้าใช้ jest, nyc)
+coverage/
+
+# PM2 logs (ถ้าใช้ PM2)
+pids/
+*.log
+
+# Prisma
+prisma/migrations/
