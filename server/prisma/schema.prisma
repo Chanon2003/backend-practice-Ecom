@@ -21,6 +21,22 @@ model User {
   password               String
   status                 Status    @default(ACTIVE)
   role                   Role      @default(USER)
+  avatar                 String?
+  avatarPublicId         String?
+  mobile                 String?
+  refresh_token          String    @default("")
+  verify_email           Boolean   @default(false)
+  isVerified             Boolean   @default(false)
+  last_login_date        DateTime?
+  verify_email_otp       String?
+  verify_email_expiry    DateTime?
+  forgot_password_otp    String?
+  forgot_password_expiry DateTime?
+
+  cart    Cart?
+  orders  Order[]
+  Address Address[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -34,4 +50,143 @@ enum Status {
 enum Role {
   ADMIN
   USER
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @default("")
+  image     String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  productCategories ProductCategory[]
+}
+
+model Product {
+  id           String  @id @default(uuid())
+  name         String
+  image        Image[]
+  stock        Int?
+  price        Float?
+  discount     Float?
+  description  String  @default("")
+  more_details Json    @default("{}")
+  publish      Boolean @default(true)
+
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  categories ProductCategory[]
+}
+
+model ProductCategory {
+  id         String @id @default(uuid())
+  productId  String
+  categoryId String
+
+  // Relation fields
+  product  Product  @relation(fields: [productId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId, categoryId]) // ป้องกันการซ้ำของ pair เดิม
+}
+
+model Image {
+  id        String  @id @default(uuid())
+  url       String // เก็บ URL ของรูปภาพ
+  product   Product @relation(fields: [productId], references: [id])
+  productId String // Foreign Key เชื่อมกับ Product
+
+  createdAt DateTime @default(now())
+}
+
+model Cart {
+  id     String     @id @default(uuid())
+  userId String     @unique // userId ต้อง unique = 1 user มีได้แค่ 1 cart
+  user   User       @relation(fields: [userId], references: [id])
+  items  CartItem[] // ความสัมพันธ์กับสินค้า
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CartItem {
+  id        String @id @default(uuid())
+  cartId    String
+  productId String
+  quantity  Int    @default(1)
+
+  cart    Cart    @relation(fields: [cartId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId]) // ป้องกันสินค้าซ้ำในตะกร้าเดียวกัน
+}
+
+model Order {
+  id     String @id @default(uuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  items           OrderItem[] // รายการสินค้าในคำสั่งซื้อ
+  totalAmount     Float
+  status          OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(UNPAID)
+  shippingAddress Address[] // หรือจะสร้าง Address table แยกก็ได้
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderItem {
+  id      String @id @default(uuid())
+  order   Order  @relation(fields: [orderId], references: [id])
+  orderId String
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+
+  quantity Int
+  price    Float // เก็บราคาตอนซื้อ เผื่อสินค้าลดราคาในภายหลัง
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model Address {
+  id         String   @id @default(uuid())
+  street     String
+  city       String
+  postalCode String
+  country    String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  userId  String
+  user    User    @relation(fields: [userId], references: [id])
+  Order   Order?  @relation(fields: [orderId], references: [id])
+  orderId String?
 }

@@ -38,3 +38,5 @@ pids/
 
 # Prisma
 prisma/migrations/
+
+server/Readme.md

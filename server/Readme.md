@@ -1,9 +1,20 @@
 npm init -y
 npm i express cors jsonwebtoken bcrypt cookie-parser dotenv morgan helmet pg axios xss cloudinary multer nodemon
+npm install express-validator
+npm i resend
+npm install ejs
+
 
 # Prisma ORM (สำหรับ PostgreSQL)
 npm install prisma --save-dev
 npx prisma init
+
+npx prisma migrate reset
+npx prisma generate
+
+***npx prisma introspect***
+ใช้งาน Prisma Introspection: ใช้คำสั่ง prisma introspect เพื่อดึงโครงสร้างฐานข้อมูลที่มีอยู่แล้วมาเป็น Prisma schema:
+คำสั่งนี้จะทำการดึงข้อมูลจากฐานข้อมูลและสร้าง Prisma schema ที่แสดงโครงสร้างตารางทั้งหมดในฐานข้อมูลนั้น เช่น ตาราง, ความสัมพันธ์ระหว่างตาราง, คีย์หลัก, คีย์ต่างประเทศ เป็นต้น
 
 npx prisma migrate dev --name "soi"
 npx prisma migrate deploy
