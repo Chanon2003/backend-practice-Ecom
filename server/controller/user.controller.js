@@ -6,6 +6,7 @@ import { validationResult } from "express-validator";
 import sendEmail from '../config/sendEmail.js';
 import  { verifyEmailTemplatesoi } from '../utils/verifyEmailTemplate.js';
 import { generateOtp } from '../utils/generatedOtp.js';
+import generatedAccessToken from '../utils/generateToken/generatedAccessToken.js';
 
 
 export const userRegisterController = async (req, res) => {
@@ -91,7 +92,7 @@ export const verifyEmailController = async (req, res) => {
     const user = await prisma.user.findFirst({ where: { email } });
 
     if (!user) {
-      return res.status(404).render("email-verification-failed", {
+      return res.status(400).render("email-verification-failed", {
         message: "User not found",
       });
     }
@@ -167,3 +168,80 @@ export const resendEmailOtpController = async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+
+export const userLoginController = async (req,res)=>{
+  try {
+    const {email,password} =req.body;
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and password are required.",
+      });
+    }
+    const sanitizedEmail = xss(email.toLowerCase());
+
+    const user = await prisma.user.findFirst({ where: { email: sanitizedEmail } });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User does not exist.",
+      });
+    }
+
+    if (user.status !== 'ACTIVE') {
+      return res.status(400).json({
+        message: "Account not active. Please contact admin.",
+        error: true,
+        success: false,
+      });
+    }
+
+    const checkPassword = await bcrypt.compare(password, user.password);
+
+    
+    if (!checkPassword) {
+      return res.status(400).json({
+        message: "Incorrect password.",
+        error: true,
+        success: false,
+      });
+    }
+    
+    const accessToken = await generatedAccessToken(user.id);
+    const refreshToken = await generatedRefreshToken(user.id);
+
+    const updateUser = await prisma.user.update({
+      where:{id:user.id},
+      data:{
+        last_login_date : new Date()
+      }
+    })
+
+    const cookiesOption = {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'Strict',
+    };
+
+    //res.cookie(name, value, options)
+    res.cookie('accessToken', accessToken, cookiesOption);
+    res.cookie('refreshToken', refreshToken, cookiesOption);
+
+    return res.json({
+      message: "Login successfully",
+      success: true,
+      error: false,
+      data: {
+        accessToken,
+        refreshToken,
+        email: user.email,
+        name: user.name,
+      },
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
