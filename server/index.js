@@ -8,6 +8,7 @@ import userRouter from './route/user.route.js';
 
 import path from 'path'
 import { fileURLToPath } from "url";
+import images from './route/images.route.js';
 
 const app = express();
 
@@ -31,7 +32,8 @@ app.use(cookieParser())
 app.use(morgan('dev'))
 app.use(helmet())
 
-app.use('/api/user',userRouter)
+app.use('/api/user',userRouter) 
+app.use('/api/images',images) 
 
 const PORT = process.env.PORT || 8080
 

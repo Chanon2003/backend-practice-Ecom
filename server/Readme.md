@@ -4,7 +4,7 @@ npm install express-validator
 npm i resend
 npm install ejs
 npm i express-rate-limit
-
+npm install multer cloudinary multer-storage-cloudinary 
 
 # Prisma ORM (สำหรับ PostgreSQL)
 npm install prisma --save-dev
