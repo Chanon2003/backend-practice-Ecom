@@ -15,10 +15,19 @@ export const formValidate = [
     .escape()
     .isLength({ min: 3 })
     .withMessage("Username must be at least 3 characters"),
+];
 
-  body("password")
+export const resetPasswordValidate = [
+  body("newPassword")
     .isLength({ min: 8 })
     .withMessage("Password must be at least 8 characters")
     .matches(/[A-Z]/)
-    .withMessage("Password must contain at least one uppercase letter")
+    .withMessage("Password must contain at least one uppercase letter"),
+
+  body("confirmPassword")
+    .isLength({ min: 8 })
+    .withMessage("Password must be at least 8 characters")
+    .matches(/[A-Z]/)
+    .withMessage("Password must contain at least one uppercase letter"),
+
 ];

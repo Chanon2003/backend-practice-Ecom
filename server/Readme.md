@@ -3,11 +3,14 @@ npm i express cors jsonwebtoken bcrypt cookie-parser dotenv morgan helmet pg axi
 npm install express-validator
 npm i resend
 npm install ejs
+npm i express-rate-limit
 
 
 # Prisma ORM (สำหรับ PostgreSQL)
 npm install prisma --save-dev
 npx prisma init
+
+npx prisma migrate dev --name init //สร้าง migrate
 
 npx prisma migrate reset
 npx prisma generate

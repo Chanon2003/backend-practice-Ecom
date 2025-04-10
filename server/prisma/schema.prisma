@@ -33,6 +33,9 @@ model User {
   forgot_password_otp    String?
   forgot_password_expiry DateTime?
 
+  incorrect_otp_attempts  Int      @default(0) 
+  lockout_time            DateTime? 
+
   cart    Cart?
   orders  Order[]
   Address Address[]
