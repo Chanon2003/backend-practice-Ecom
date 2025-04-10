@@ -9,7 +9,7 @@ import { generateOtp } from '../utils/generatedOtp.js';
 import generatedAccessToken from '../utils/generateToken/generatedAccessToken.js';
 import generatedRefreshToken from '../utils/generateToken/generatedRefreshToken.js';
 import { forgotPasswordTemplate } from '../utils/forgotPasswordTemplate.js';
-
+import { cloudinary } from '../utils/cloudinary.js';
 
 export const userRegisterController = async (req, res) => {
   try {
@@ -498,7 +498,7 @@ export const resetPassword = async (req, res) => {
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    
+
     if (newPassword !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match", error: true });
     }
@@ -526,3 +526,122 @@ export const resetPassword = async (req, res) => {
   }
 }
 
+export const uploadAvatar = async (req, res) => {
+  try {
+    const userId = req.user?.id; // ดึง userId จาก req.user (ต้องมี middleware ที่ยืนยันตัวตน)
+    const reqfile = req.file;   // รับไฟล์จาก multer
+
+    if (!userId || reqfile.length === 0) {
+      return res.status(400).json({ error: 'User ID and avatar image are required' });
+    }
+
+    // สร้างอ็อบเจ็กต์ข้อมูลภาพ
+    const uploadedImages = {
+      imageUrl: reqfile.path,        // URL ของภาพที่อัปโหลด
+      publicId: reqfile.filename,    // public_id สำหรับใช้ลบหรืออัปเดต
+    };
+
+    // อัปเดตข้อมูล avatar ในฐานข้อมูล
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        avatar: uploadedImages.imageUrl,       // URL ของภาพ
+        avatarPublicId: uploadedImages.publicId,  // public_id ของภาพ
+      },
+    });
+
+    // ส่งผลลัพธ์กลับไป
+    return res.status(200).json({
+      message: 'Avatar updated successfully',
+      data: updatedUser,
+    });
+
+  } catch (error) {
+    console.error('Error uploading avatar:', error);
+    return res.status(500).json({
+      message: 'Internal server error',
+      error: true,
+    });
+  }
+};
+
+export const updatedAvatar = async (req, res) => {
+  try {
+    const userId = req.user?.id;  // ดึง userId จาก middleware
+    const { oldImages } = req.body;  // รับ public_id ของภาพเก่า (ถ้ามี)
+    const reqfile = req.file;  // รับไฟล์จาก multer
+
+    if (!userId || !reqfile) {
+      return res.status(400).json({ error: 'User ID and avatar image are required' });
+    }
+
+    // หากมี public_id ของภาพเก่า ให้ทำการลบภาพนั้นจาก Cloudinary
+    if (oldImages && Array.isArray(JSON.parse(oldImages))) {
+      for (const public_id of JSON.parse(oldImages)) {
+        await cloudinary.uploader.destroy(public_id);
+      }
+    }
+
+    // สร้างข้อมูลของภาพที่อัปโหลด
+    const uploadedImages = {
+      imageUrl: reqfile.path,        // URL ของภาพที่อัปโหลด
+      publicId: reqfile.filename,    // public_id สำหรับใช้ลบหรืออัปเดต
+    };
+
+    // อัปเดตข้อมูล avatar ในฐานข้อมูล
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        avatar: uploadedImages.imageUrl,      // URL ของภาพ
+        avatarPublicId: uploadedImages.publicId,  // public_id ของภาพ
+      },
+    });
+
+    // ส่งผลลัพธ์กลับไป
+    return res.status(200).json({
+      message: 'Avatar updated successfully',
+      data: updatedUser,
+    });
+
+  } catch (error) {
+    console.error('Error uploading avatar:', error);
+    return res.status(500).json({
+      message: 'Internal server error',
+      error: true,
+    });
+  }
+};
+
+export const deleteAvatar = async (req, res) => {
+  try {
+    const userId = req.user?.id;  // ดึง userId จาก middleware
+    const { publicIds } = req.body
+
+    if (!Array.isArray(publicIds)) {
+      return res.status(400).json({ error: 'publicIds should be an array' });
+    }
+
+    await Promise.all(
+      publicIds.map(publicId => cloudinary.uploader.destroy(publicId))
+    );
+
+    // อัปเดตข้อมูล avatar ในฐานข้อมูล
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        avatar: "",      // URL ของภาพ
+        avatarPublicId: "",  // public_id ของภาพ
+      },
+    });
+
+    // ส่งผลลัพธ์กลับไป
+    return res.status(200).json({ message: 'Images deleted successfully' });
+
+  } catch (error) {
+    console.error('Error uploading avatar:', error);
+    return res.status(500).json({
+      message: 'Internal server error',
+      error: true,
+    });
+  }
+};

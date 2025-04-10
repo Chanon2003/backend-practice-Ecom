@@ -1,8 +1,9 @@
 import { Router } from "express";
-import { forgotPassword, resendEmailOtpController, resetPassword, userLoginController, userLogout, userRegisterController, verifyEmailController, verifyForgotPasswordOtp } from "../controller/user.controller.js";
+import { deleteAvatar, forgotPassword, resendEmailOtpController, resetPassword, updatedAvatar, uploadAvatar, userLoginController, userLogout, userRegisterController, verifyEmailController, verifyForgotPasswordOtp } from "../controller/user.controller.js";
 import {formValidate, resetPasswordValidate} from '../validators/formValidate.js'
 import auth from "../middleware/auth.js";
 import limiter from "../middleware/rateLimit.js";
+import { upload } from "../middleware/multer.js";
 const userRouter = Router();
 
 userRouter.post('/register',formValidate,userRegisterController)
@@ -14,6 +15,12 @@ userRouter.post('/logout', auth, userLogout);
 userRouter.post('/forgot-password', forgotPassword);
 userRouter.post('/verify-forgot-password-otp',verifyForgotPasswordOtp);
 userRouter.put('/reset-password',resetPasswordValidate,resetPassword);
+
+
+userRouter.post('/upload-avatar',auth,upload.single('images'),uploadAvatar);
+userRouter.post('/update-avatar',auth,upload.single('images'),updatedAvatar);
+userRouter.post('/delete-avatar',auth,upload.single('images'),deleteAvatar);
+
 
 
 //ejs
