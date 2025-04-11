@@ -4,6 +4,7 @@ import { deleteImages, updateImages, uploadImages } from "../controller/uploadIm
 
 const images = Router();
 
+//route ทดลอง image
 images.post('/upload-images',upload.array('images'),uploadImages);
 images.post('/update-images',upload.array('images'),updateImages);
 images.delete('/delete-images',upload.array('images'),deleteImages);
