@@ -23,7 +23,7 @@ userRouter.post('/delete-avatar',auth,upload.single('images'),deleteAvatar);
 
 
 
-//ejs
+//ejs feature product test
 userRouter.get('/verify-email', (req, res) => {
   const email = req.query.email;
   res.render('verify-email', { email });
