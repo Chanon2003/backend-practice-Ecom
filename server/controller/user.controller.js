@@ -16,12 +16,13 @@ export const userRegisterController = async (req, res) => {
     const { password, name, email } = req.body;
 
     const sanitizedName = xss(name);  // sanitize name
-    const sanitizedEmail = xss(email);  // sanitize email
+    const sanitizedEmail1 = xss(email);  // sanitize email
 
-    if (!sanitizedEmail || !password) {
+    if (!sanitizedEmail1 || !password) {
       return res.status(400).json({ message: "Email and password are required!" });
     }
 
+    const sanitizedEmail = sanitizedEmail1.toLowerCase()
     // ตรวจสอบว่า email ซ้ำในฐานข้อมูลหรือไม่
     const userOldEmail = await prisma.user.findFirst({
       where: { email: sanitizedEmail }
@@ -67,7 +68,11 @@ export const userRegisterController = async (req, res) => {
       html: verifyEmailTemplatesoi({ name: user.name, otp }),
     });
 
-    res.status(201).json({ message: "User registered successfully!" });
+    res.status(201).json({ 
+      message: "User registered successfully!",
+      success:true,
+      error:false
+    });
   } catch (error) {
     console.log(error)
     return res.status(500).json({

@@ -6,6 +6,14 @@ npm install ejs
 npm i express-rate-limit
 npm install multer cloudinary multer-storage-cloudinary 
 
+npm install passport passport-google-oauth20 
+
+
+npm install multer-storage-cloudinary --legacy-peer-deps   //cloud version ไม่ตรงกัน 
+npm install google-auth-library --legacy-peer-deps
+
+
+
 # Prisma ORM (สำหรับ PostgreSQL)
 npm install prisma --save-dev
 npx prisma init

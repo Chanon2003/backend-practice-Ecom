@@ -10,6 +10,7 @@ userRouter.post('/register',formValidate,userRegisterController)
 userRouter.post('/verify-email-otp',limiter,verifyEmailController)
 userRouter.post('/resend-email-verification',limiter,resendEmailOtpController)
 userRouter.post('/login',limiter,userLoginController)
+
 userRouter.post('/logout', auth, userLogout); 
 
 userRouter.post('/forgot-password', forgotPassword);
@@ -22,7 +23,6 @@ userRouter.post('/update-avatar',auth,upload.single('images'),updatedAvatar);
 userRouter.post('/delete-avatar',auth,upload.single('images'),deleteAvatar);
 
 
-
 //ejs feature product test
 userRouter.get('/verify-email', (req, res) => {
   const email = req.query.email;
@@ -31,6 +31,17 @@ userRouter.get('/verify-email', (req, res) => {
 userRouter.get('/register', (req, res) => {
   res.render('register');
 });
+userRouter.get('/login', (req, res) => {
+  res.render('login');
+});
+userRouter.get('/forgot-password', (req, res) => {
+  res.render('forgot-password',{ message: null });
+});
+userRouter.get('/reset-password', (req, res) => {
+  res.render('reset-password');
+});
+
+
 
 
 export default userRouter

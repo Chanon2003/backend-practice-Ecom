@@ -11,8 +11,9 @@ import { fileURLToPath } from "url";
 import images from './route/images.route.js';
 
 const app = express();
-
 dotenv.config()
+
+
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 
@@ -21,7 +22,6 @@ const __dirname = path.dirname(__filename);
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
-
 
 app.use(cors({
   credentials:true,
